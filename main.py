@@ -46,6 +46,8 @@ system_prompt = dedent(
     """
 )
 stream_output = True
+
+# TODO: Build a gradio web UI
 generated_text = rag_pipeline.query(
     user_query=user_query,
     system_prompt=system_prompt,
