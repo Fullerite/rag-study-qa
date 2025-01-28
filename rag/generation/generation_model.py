@@ -41,7 +41,8 @@ class TransformersGenerationModel:
                 torch_dtype=torch.float16 if bnb_config is None else None,
                 quantization_config=self._bnb_config,
                 device_map="auto" if bnb_config is not None else None,
-                low_cpu_mem_usage=True
+                low_cpu_mem_usage=True,
+                trust_remote_code=True
             )
             if self._bnb_config is None:
                 self._model = self._model.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
