@@ -86,7 +86,7 @@ class SentenceTransformersEmbeddingModel:
         """
 
         try:
-            logger.info(f"embedding {len(sentences) if isinstance(sentences, list) else 1} sentence(s)")
+            logger.info(f"Embedding {len(sentences) if isinstance(sentences, list) else 1} sentence(s)")
 
             # Generate embeddings using the SentenceTransformers model
             encoding_kwargs = {
