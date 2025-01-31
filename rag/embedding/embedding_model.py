@@ -43,7 +43,7 @@ class SentenceTransformersEmbeddingModel:
         except Exception as e:
             logger.exception(
                 f"Failed to load the model\n"
-                f"Model: {self.model_name}\n"
+                f"Model: {repr(self.model_name)}\n"
                 f"Quantization Config: None"
             )
             raise ModelLoadingError(
