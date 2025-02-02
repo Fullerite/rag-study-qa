@@ -35,7 +35,7 @@ class TransformersGenerationModel:
         self.model_name = model_name
         self._bnb_config = bnb_config
 
-        logger.info(f"Initializing generation model: {model_name}")
+        logger.info(f"Initializing generation model: {repr(model_name)}")
         try:
             self._model = AutoModelForCausalLM.from_pretrained(
                 pretrained_model_name_or_path=self.model_name,
