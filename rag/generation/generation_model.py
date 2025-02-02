@@ -61,7 +61,7 @@ class TransformersGenerationModel:
                 f"Quantization Config: {self._bnb_config}"
             )
             raise ModelLoadingError(
-                f"An error occurred while loading the model {model_name}:\n{e}",
+                f"An error occurred while loading the model {repr(model_name)}:\n{e}",
                 model_name=self.model_name,
                 quantization_config=self._bnb_config
             )
@@ -83,7 +83,7 @@ class TransformersGenerationModel:
     def __str__(self):
         return (
             f"TransformersGenerationModel(\n"
-            f"  model_name={self.model_name},\n"
+            f"  model_name={repr(self.model_name)},\n"
             f"  device={self.device}\n"
             f")"
         )
@@ -92,7 +92,7 @@ class TransformersGenerationModel:
     def __repr__(self):
         return (
             f"TransformersGenerationModel(\n"
-            f"  model_name={self.model_name},\n"
+            f"  model_name={repr(self.model_name)},\n"
             f"  model={repr(self._model)},\n"
             f"  tokenizer={repr(self._tokenizer)},\n"
             f"  bnb_config={repr(self._bnb_config)},\n"

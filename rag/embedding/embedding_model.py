@@ -29,7 +29,7 @@ class SentenceTransformersEmbeddingModel:
             - ModelLoadingError: If an error occurs while loading the SentenceTransformers model.
         """
 
-        logger.info(f"Initializing embedding model: {model_name}")
+        logger.info(f"Initializing embedding model: {repr(model_name)}")
         try:
             self.model_name = model_name
             self._model = SentenceTransformer(
@@ -47,7 +47,7 @@ class SentenceTransformersEmbeddingModel:
                 f"Quantization Config: None"
             )
             raise ModelLoadingError(
-                f"An error occurred while loading the model {model_name}:\n{e}",
+                f"An error occurred while loading the model {repr(model_name)}:\n{e}",
                 model_name=self.model_name,
             )
 
@@ -55,7 +55,7 @@ class SentenceTransformersEmbeddingModel:
     def __str__(self):
         return (
             f"SentenceTransformersEmbeddingModel(\n"
-            f"  model_name={self.model_name},\n"
+            f"  model_name={repr(self.model_name)},\n"
             f"  device={self.device}\n"
             f")"
         )
@@ -64,7 +64,7 @@ class SentenceTransformersEmbeddingModel:
     def __repr__(self):
         return (
             f"SentenceTransformersEmbeddingModel(\n"
-            f"  model_name={self.model_name},\n"
+            f"  model_name={repr(self.model_name)},\n"
             f"  model={repr(self._model)},\n"
             f"  device={self.device}\n"
             f")"
