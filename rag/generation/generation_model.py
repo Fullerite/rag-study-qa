@@ -1,7 +1,8 @@
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TextStreamer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TextIteratorStreamer
+from threading import Thread
 from textwrap import dedent
-from typing import Optional
+from typing import Optional, Union, Generator
 from exceptions.custom_exceptions import ModelLoadingError, GenerationError, TemplateTokenizationError
 
 
@@ -101,7 +102,7 @@ class TransformersGenerationModel:
         )
 
 
-    def generate(self, query: str, system_prompt: str = "", stream_output: bool = False) -> str:
+    def generate(self, query: str, system_prompt: str = "", stream_output: bool = False) -> Union[Generator[str, None, None], str]:
         """
         Generates text based on the input query and system prompt.
 
@@ -111,15 +112,15 @@ class TransformersGenerationModel:
             - stream_output (bool): Whether to stream the output in real-time. Defaults to False.
 
         Returns:
-            - str: The generated text.
+            - Union[str, Iterator[str, None, None]]:
+                - stream_output=False: The complete generated text string.
+                - stream_output=True: An iterator that yields chunks of generated text as they are produced.
         
         Raises:
             - GenerationError: If an error occurs during generation.
         """
 
         try:
-            logger.info("Starting text generation")
-
             # Prepare the messages for the chat template
             messages = [
                 {
@@ -133,6 +134,7 @@ class TransformersGenerationModel:
             ]
 
             # Apply the chat template to format the input
+            logger.info("Applying chat template")
             prompt = self._tokenizer.apply_chat_template(
                 messages,
                 tokenize=False,
@@ -146,6 +148,7 @@ class TransformersGenerationModel:
                     f"Updating self.device."
                 )
                 self.device = self._model.device
+            logger.info("Tokenizing model prompt")
             input_ids = self._tokenizer(
                 prompt,
                 return_tensors="pt"
@@ -169,41 +172,63 @@ class TransformersGenerationModel:
             )
 
         try:
-            # Configure the streamer for real-time output
-            if stream_output:
-                streamer = TextStreamer(
-                    tokenizer=self._tokenizer,
-                    skip_prompt=True,
-                    skip_special_tokens=True,
-                    clean_up_tokenization_spaces=True
-                )
-            else:
-                streamer = None
-            
-            # Generate text with or without streaming
+            # Pre-configure generation kwargs
             generation_kwargs = {
-                "streamer": streamer,
                 "max_new_tokens": 512,
                 "do_sample": True,
                 "temperature": 0.1,
                 "top_k": 30,
                 "top_p": 0.9
             }
-            with torch.no_grad():             
-                output_ids = self._model.generate(
-                    **input_ids,
-                    **generation_kwargs
+
+            if stream_output:
+                # Configure the streamer for real-time output
+                streamer = TextIteratorStreamer(
+                    tokenizer=self._tokenizer,
+                    skip_prompt=True,
+                    skip_special_tokens=True,
+                    clean_up_tokenization_spaces=True
                 )
 
-            # Decode the generated text, excluding the input query
-            generated_text = self._tokenizer.decode(
-                output_ids[0][len(input_ids[0]):],  # filter out the input query
-                skip_special_tokens=True,
-                clean_up_tokenization_spaces=True
-            )
+                # Add streamer to generation kwargs
+                generation_kwargs["streamer"] = streamer
 
-            logger.info("Text generation completed")
-            return generated_text
+                # Offload generation to a separate thread
+                thread = Thread(
+                    target=self._model.generate,
+                    kwargs={**input_ids, **generation_kwargs}
+                )
+                thread.start()
+
+                logger.info("Starting text streaming")
+
+                # Yield the generating text chunk-by-chunk
+                for chunk in streamer:
+                    yield chunk
+
+                logger.info("Text streaming completed")       
+            else:
+                # Add streamer to generation kwargs
+                generation_kwargs["streamer"] = None
+
+                logger.info("Starting text generation")
+
+                # Generate text without streaming
+                with torch.no_grad():             
+                    output_ids = self._model.generate(
+                        **input_ids,
+                        **generation_kwargs
+                    )
+
+                # Decode the generated text, excluding the input prompt
+                generated_text = self._tokenizer.decode(
+                    output_ids[0][len(input_ids[0]):],  # filter out the prompt
+                    skip_special_tokens=True,
+                    clean_up_tokenization_spaces=True
+                )
+
+                logger.info("Text generation completed")
+                return generated_text
         except Exception as e:
             input_ids = input_ids if 'input_ids' in locals() else 'N/A'
             streamer = streamer if 'streamer' in locals() else 'N/A'
