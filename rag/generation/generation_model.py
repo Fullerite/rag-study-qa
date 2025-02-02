@@ -149,12 +149,14 @@ class TransformersGenerationModel:
                 return_tensors="pt"
             ).to(self.device)
         except Exception as e:
+            messages = messages if 'messages' in locals() else 'N/A'
+            prompt = prompt if 'prompt' in locals() else 'N/A'
             logger.exception(
                 f"Failed during template application or tokenization\n"
                 f"Query: {query}\n"
                 f"System Prompt: {system_prompt}\n"
                 f"Messages: {messages}\n"
-                f"Prompt: {prompt if 'prompt' in locals() else 'N/A'}\n"
+                f"Prompt: {prompt}\n"
                 f"Model: {repr(self)}"
             )
             raise TemplateTokenizationError(
@@ -201,13 +203,16 @@ class TransformersGenerationModel:
             logger.info("Text generation completed")
             return generated_text
         except Exception as e:
+            input_ids = input_ids if 'input_ids' in locals() else 'N/A'
+            streamer = streamer if 'streamer' in locals() else 'N/A'
+            generation_kwargs = generation_kwargs if 'generation_kwargs' in locals() else 'N/A'
             logger.exception(
                 f"Failed to generate output using\n"
                 f"Query: '{query}'\n"
                 f"System Prompt: '{system_prompt}'\n"
-                f"Input IDs: {input_ids if 'input_ids' in locals() else 'N/A'}\n"
+                f"Input IDs: {input_ids}\n"
                 f"Stream Output: {stream_output}\n"
-                f"Streamer: {streamer}\n"
+                f"Streamer: {repr(streamer)}\n"
                 f"Generation Kwargs: {generation_kwargs}\n"
                 f"Model: {repr(self)}"
             )
