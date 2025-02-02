@@ -153,8 +153,8 @@ class TransformersGenerationModel:
             prompt = prompt if 'prompt' in locals() else 'N/A'
             logger.exception(
                 f"Failed during template application or tokenization\n"
-                f"Query: {query}\n"
-                f"System Prompt: {system_prompt}\n"
+                f"Query: '{query}'\n"
+                f"System Prompt: '{system_prompt}'\n"
                 f"Messages: {messages}\n"
                 f"Prompt: {prompt}\n"
                 f"Model: {repr(self)}"
