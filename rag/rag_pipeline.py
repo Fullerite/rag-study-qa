@@ -114,9 +114,9 @@ class RAGPipeline:
         except Exception as e:
             logger.exception(
                 f"Failed to create knowledge corpus\n"
-                f"Data Directory: {data_dir}\n"
-                f"Task Pattern: {task_pattern}\n"
-                f"Answer Pattern: {answer_pattern}\n"
+                f"Data Directory: {repr(data_dir)}\n"
+                f"Task Pattern: {repr(task_pattern)}\n"
+                f"Answer Pattern: {repr(answer_pattern)}\n"
                 f"Add Start-End Index: {add_start_end_index}"
                 f"ChromaDB client: {repr(self.client)}"
                 f"ChromaDB collection: {repr(self.collection)}"
@@ -218,7 +218,7 @@ class RAGPipeline:
             logger.exception(
                 f"Failed to process query\n"
                 f"Query: '{user_query}'\n"
-                f""
+                f"System prompt: '{system_prompt}\n'"
                 f"Embedding Model: {repr(self._embedding_model)}\n"
                 f"Generation Model: {repr(self._generation_model)}\n"
                 f"ChromaDB client: {repr(self.client)}"
