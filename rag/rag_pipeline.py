@@ -7,7 +7,7 @@ from rag.embedding.embedding_model import SentenceTransformersEmbeddingModel
 from rag.embedding.embedding_function import SentenceTransformerEmbeddingFunction
 from document_processing.document_processor import DocumentProcessor
 
-from typing import Optional
+from typing import Optional, Union, Generator
 from exceptions.custom_exceptions import RAGInitializationError, CorpusCreationError, QueryProcessingError
 
 
@@ -139,7 +139,7 @@ class RAGPipeline:
         context_window_backward: Optional[int] = None,
         context_window_forward: Optional[int] = None,
         stream_output: bool = False
-    ) -> str:
+    ) -> Union[Generator[str, None, None], str]:
         """
         Answers a user query by retrieving relevant context from the knowledge corpus and generating a response.
 
@@ -155,7 +155,9 @@ class RAGPipeline:
                                     Defaults to False.
 
         Returns:
-            - str: The generated answer to the user query.
+            - Union[str, Generator[str, None, None]]:
+                - stream_output=False: The complete generated text string.
+                - stream_output=True: An generator that yields chunks of generated text as they are produced.
         """
 
         try:

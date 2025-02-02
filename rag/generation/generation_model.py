@@ -112,9 +112,9 @@ class TransformersGenerationModel:
             - stream_output (bool): Whether to stream the output in real-time. Defaults to False.
 
         Returns:
-            - Union[str, Iterator[str, None, None]]:
+            - Union[str, Generator[str, None, None]]:
                 - stream_output=False: The complete generated text string.
-                - stream_output=True: An iterator that yields chunks of generated text as they are produced.
+                - stream_output=True: A generator that yields chunks of generated text as they are produced.
         
         Raises:
             - GenerationError: If an error occurs during generation.
