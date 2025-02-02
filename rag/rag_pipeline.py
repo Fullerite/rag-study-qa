@@ -83,7 +83,7 @@ class RAGPipeline:
         """
 
         try:
-            logger.info(f"Creating knowledge corpus from directory: {data_dir}")
+            logger.info(f"Creating knowledge corpus from directory: {repr(data_dir)}")
 
             # Process each PDF file in the directory
             corpus_passages = []
@@ -161,7 +161,7 @@ class RAGPipeline:
         """
 
         try:
-            logger.info(f"Processing query: {user_query}")
+            logger.info(f"Processing query: {repr(user_query)}")
 
             # Extract test and question numbers from the query
             metadata_filter = {}
