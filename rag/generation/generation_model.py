@@ -138,6 +138,8 @@ class TransformersGenerationModel:
                 tokenize=False,
                 add_generation_prompt=True
             )
+
+            # Move the inputs ids to a proper device
             if self.device != self._model.device:
                 logger.warning(
                     f"Device mismatch: self.device ({self.device}) does not match self._model.device ({self._model.device})."
