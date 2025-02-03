@@ -1,22 +1,9 @@
 import logging
 import gradio as gr
-from logging import Logger
 from rag.embedding.embedding_model import SentenceTransformersEmbeddingModel
 from rag.generation.generation_model import TransformersGenerationModel
 from rag.rag_pipeline import RAGPipeline
-from textwrap import dedent
-from typing import Optional
-
-
-def get_logger() -> Logger:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[logging.StreamHandler()]  # TODO: add persistent logs storage
-    )
-    logger = logging.getLogger(__name__)
-
-    return logger
+from rag_logs.logger import configure_logging
 
 
 def query(
@@ -52,7 +39,8 @@ def query(
         yield generated_text
 
 
-logger = get_logger()
+configure_logging()
+logger = logging.getLogger(__name__)
 
 # TODO: create the knowledge corpus on startup, and not on each query call
 # TODO: add file upload functionality to dynamically extend knowledge corpus ???
