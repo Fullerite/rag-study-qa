@@ -25,8 +25,8 @@ class RAGPipeline:
 
     def __init__(
         self,
-        generation_model: TransformersGenerationModel,
-        embedding_model: SentenceTransformersEmbeddingModel
+        embedding_model: SentenceTransformersEmbeddingModel,
+        generation_model: TransformersGenerationModel
     ):
         """
         Initializes the RAGPipeline with a generation model and an embedding model.
@@ -41,8 +41,8 @@ class RAGPipeline:
 
         try:
             logger.info("Initializing RAG pipeline")
-            self._generation_model = generation_model
             self._embedding_model = embedding_model
+            self._generation_model = generation_model
             self.client = chromadb.Client()
             self.collection = self.client.create_collection(
                 name="test_collection",
