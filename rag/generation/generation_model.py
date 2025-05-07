@@ -206,7 +206,7 @@ class TransformersGenerationModel:
                 for chunk in streamer:
                     yield chunk
 
-                logger.info("Text streaming completed")       
+                logger.info("Text streaming completed")
             else:
                 # Add streamer to generation kwargs
                 generation_kwargs["streamer"] = None

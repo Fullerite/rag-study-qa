@@ -7,33 +7,46 @@ from rag_logs.logger import configure_logging
 from exceptions.custom_exceptions import ModelLoadingError, RAGInitializationError
 
 
+# TODO: add the ability to re-initialize the models without re-creating the knowledge corpus
+# TODO: load default models on the initial startup
+# TODO: make the knowledge corpus persistent ???
 def initialize_pipeline(
     embedding_model_name: str,
     generation_model_name: str
 ):
     global rag_pipeline
+    state = []
 
     try:
         embedding_model = SentenceTransformersEmbeddingModel(
             model_name=embedding_model_name
         )
+        state.append("Embedding model has been loaded.")
+        yield " ".join(state)
         generation_model = TransformersGenerationModel(
             model_name=generation_model_name
         )
+        state.append("Generation model has been loaded.")
+        yield " ".join(state)
     except ModelLoadingError as e:
         return f"An unexpected error occured when loading {repr(e.model_name)}."
 
     try:
         rag_pipeline = RAGPipeline(embedding_model, generation_model)
+        state.append("RAG pipeline initialized.")
+        yield " ".join(state)
     except RAGInitializationError as e:
         return f"An unexpected error occured during RAG pipeline initialization."
-    
+
     rag_pipeline.create_knowledge_corpus(
         data_dir="data",
         task_pattern=r"(Question\s+\d+\..*?)(?=Question\s+\d+\.|\Z)",
         answer_pattern=r"^[A-D]\)",
         add_start_end_index=True
     )
+    state.append("Knowledge corpus created.")
+    yield " ".join(state)
+
 
 def query(
     system_prompt: str,
@@ -41,7 +54,7 @@ def query(
 ):
     global rag_pipeline
 
-    streamed_output = rag_pipeline.query(
+    streamed_output, context = rag_pipeline.query(
         user_query=user_query,
         system_prompt=system_prompt,
         stream_output=True
@@ -50,7 +63,7 @@ def query(
     generated_text = ""
     for text_chunk in streamed_output:
         generated_text += text_chunk
-        yield generated_text
+        yield generated_text, context
 
 
 configure_logging()
@@ -65,9 +78,12 @@ query_interface = gr.Interface(
         gr.Textbox(label="System Prompt", lines=10),
         gr.Textbox(lines=2, placeholder="Enter your question here...", label="User Query"),
     ],
-    outputs=gr.Textbox(label="Streaming Output", autoscroll=True),
+    outputs=[
+        gr.Textbox(label="RAG context"),
+        gr.Textbox(label="Streaming Output", autoscroll=True)
+    ],
     title="RAG Pipeline for English Proficiency Test",
-    description="Ask questions about your English proficiency test and get detailed, streamed explanations."
+    description="Ask questions about your English proficiency test and get detailed explanations."
 )
 load_models_interface = gr.Interface(
     fn=initialize_pipeline,

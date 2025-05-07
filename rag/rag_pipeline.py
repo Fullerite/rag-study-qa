@@ -7,7 +7,7 @@ from rag.embedding.embedding_model import SentenceTransformersEmbeddingModel
 from rag.embedding.embedding_function import SentenceTransformerEmbeddingFunction
 from document_processing.document_processor import DocumentProcessor
 
-from typing import Optional, Union, Generator
+from typing import Optional, Union, Tuple, Generator
 from exceptions.custom_exceptions import RAGInitializationError, CorpusCreationError, QueryProcessingError
 
 
@@ -107,10 +107,9 @@ class RAGPipeline:
                     metadatas=corpus_metadatas,
                     ids=[str(uuid.uuid4()) for _ in range(len(corpus_passages))]
                 )
-
                 logger.info(f"Added {len(corpus_passages)} passages to knowledge corpus")
             else:
-                logger.warning("No valid passages were found. Knowledge corpus is empty.")
+                logger.warning("No valid passages were found. Knowledge corpus is empty")
         except Exception as e:
             logger.exception(
                 f"Failed to create knowledge corpus\n"
@@ -139,7 +138,7 @@ class RAGPipeline:
         context_window_backward: Optional[int] = None,
         context_window_forward: Optional[int] = None,
         stream_output: bool = False
-    ) -> Union[Generator[str, None, None], str]:
+    ) -> Tuple[Union[Generator[str, None, None], str], str]:
         """
         Answers a user query by retrieving relevant context from the knowledge corpus and generating a response.
 
@@ -158,6 +157,7 @@ class RAGPipeline:
             - Union[str, Generator[str, None, None]]:
                 - stream_output=False: The complete generated text string.
                 - stream_output=True: An generator that yields chunks of generated text as they are produced.
+            - str: The context fetched from the knowledge corpus and used by the generation model.
         """
 
         try:
@@ -215,7 +215,7 @@ class RAGPipeline:
                 stream_output=stream_output
             )
 
-            return query_answer
+            return query_answer, passage_context
         except Exception as e:
             logger.exception(
                 f"Failed to process query\n"
