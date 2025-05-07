@@ -19,8 +19,7 @@ class DocumentTaskSplitter:
     def __init__(
         self,
         task_pattern: str,
-        answer_pattern: str,
-        add_start_end_index: bool = False
+        answer_pattern: str
     ):
         """
         Initializes the DocumentTaskSplitter with task and answer patterns.
@@ -28,7 +27,6 @@ class DocumentTaskSplitter:
         Args:
             - task_pattern (str): The regular expression pattern for identifying task beginnings.
             - answer_pattern (str): The regular expression pattern for identifying answers within tasks.
-            - add_start_end_index (bool): Whether to include start and end indices in the metadata.
         
         Raises:
             - ValueError: If the task or answer pattern is invalid.
@@ -36,7 +34,6 @@ class DocumentTaskSplitter:
 
         self._task_pattern = task_pattern
         self._answer_pattern = answer_pattern
-        self._add_start_end_index = add_start_end_index
 
         try:
             re.compile(self._task_pattern)
@@ -50,8 +47,7 @@ class DocumentTaskSplitter:
         return (
             f"DocumentTaskSplitter(\n"
             f"  task_pattern={self._task_pattern},\n"
-            f"  answer_pattern={self._answer_pattern},\n"
-            f"  add_start_end_index={self._add_start_end_index}\n"
+            f"  answer_pattern={self._answer_pattern}\n"
             f")"
         )
 
@@ -59,8 +55,7 @@ class DocumentTaskSplitter:
         return (
             f"DocumentTaskSplitter(\n"
             f"  task_pattern={self._task_pattern},\n"
-            f"  answer_pattern={self._answer_pattern},\n"
-            f"  add_start_end_index={self._add_start_end_index}\n"
+            f"  answer_pattern={self._answer_pattern}\n"
             f")"
         )
 
@@ -149,12 +144,11 @@ class DocumentTaskSplitter:
                     question_statement, question_full = chunk["question_statement"], chunk["question_full"]
                     metadata = document.metadata.copy()
 
-                    # Add start and end indices if required
-                    if self._add_start_end_index:
-                        start_index = document.page_content.find(question_statement)
-                        end_index = start_index + len(question_full)
-                        metadata["start_index"] = start_index
-                        metadata["end_index"] = end_index
+                    # Add start and end indices
+                    start_index = document.page_content.find(question_statement)
+                    end_index = start_index + len(question_full)
+                    metadata["start_index"] = start_index
+                    metadata["end_index"] = end_index
 
                     # Create a new document for each task
                     new_document = Document(page_content=question_statement, metadata=metadata)

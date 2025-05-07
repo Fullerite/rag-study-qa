@@ -54,7 +54,6 @@ class DocumentProcessor:
         file_path: str,
         task_pattern: str,
         answer_pattern:str,
-        add_start_end_index: bool = False
     ) -> Tuple[List[str], List[dict]]:
         """
         Processes a PDF file, extracting text passages and associated metadata.
@@ -63,8 +62,6 @@ class DocumentProcessor:
             - file_path (str): The path to the PDF file.
             - task_pattern (str): The regular expression pattern used to identify tasks within the document.
             - answer_pattern (str): The regular expression pattern used to identify answers within the document.
-            - add_start_end_index (bool): Whether to add the start and end indices of each chunk to its metadata.
-                                            Defaults to False.
 
         Returns:
             - Tuple[List[str], List[dict]]: A tuple containing two lists:
@@ -89,8 +86,7 @@ class DocumentProcessor:
             # Initialize the text splitter with the specified patterns and settings
             text_splitter = DocumentTaskSplitter(
                 task_pattern=task_pattern,
-                answer_pattern=answer_pattern,
-                add_start_end_index=add_start_end_index
+                answer_pattern=answer_pattern
             )
             
             # Split the document into chunks and process each chunk

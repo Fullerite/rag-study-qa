@@ -42,7 +42,6 @@ def initialize_pipeline(
         data_dir="data",
         task_pattern=r"(Question\s+\d+\..*?)(?=Question\s+\d+\.|\Z)",
         answer_pattern=r"^[A-D]\)",
-        add_start_end_index=True
     )
     state.append("Knowledge corpus created.")
     yield " ".join(state)

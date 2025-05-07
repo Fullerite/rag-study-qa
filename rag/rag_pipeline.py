@@ -70,7 +70,6 @@ class RAGPipeline:
         data_dir: str,
         task_pattern: str,
         answer_pattern:str,
-        add_start_end_index: bool = False
     ) -> None:
         """
         Creates a knowledge corpus by processing PDF files in the specified directory.
@@ -79,7 +78,6 @@ class RAGPipeline:
             - data_dir (str): The directory containing the PDF files.
             - task_pattern (str): The regex pattern used to identify tasks within the documents.
             - answer_pattern (str): The regex pattern used to identify answers within the documents.
-            - add_start_end_index (bool): Whether to include start and end indices in the metadata. Defaults to False.
         """
 
         try:
@@ -94,8 +92,7 @@ class RAGPipeline:
                     passages, metadatas = DocumentProcessor.process_file(
                         file_path=file_path,
                         task_pattern=task_pattern,
-                        answer_pattern=answer_pattern,
-                        add_start_end_index=add_start_end_index
+                        answer_pattern=answer_pattern
                     )
                     corpus_passages.extend(passages)
                     corpus_metadatas.extend(metadatas)
@@ -116,7 +113,6 @@ class RAGPipeline:
                 f"Data Directory: {repr(data_dir)}\n"
                 f"Task Pattern: {repr(task_pattern)}\n"
                 f"Answer Pattern: {repr(answer_pattern)}\n"
-                f"Add Start-End Index: {add_start_end_index}"
                 f"ChromaDB client: {repr(self.client)}"
                 f"ChromaDB collection: {repr(self.collection)}"
             )
@@ -125,7 +121,6 @@ class RAGPipeline:
                 data_dir=data_dir,
                 task_pattern=task_pattern,
                 answer_pattern=answer_pattern,
-                add_start_end_index=add_start_end_index,
                 chromadb_client_info=repr(self.client),
                 chromadb_collection_info=repr(self.collection)
             )
