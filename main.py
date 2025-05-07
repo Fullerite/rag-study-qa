@@ -78,11 +78,14 @@ query_interface = gr.Interface(
         gr.Textbox(lines=2, placeholder="Enter your question here...", label="User Query"),
     ],
     outputs=[
-        gr.Textbox(label="RAG context"),
-        gr.Textbox(label="Streaming Output", autoscroll=True)
+        gr.Textbox(label="Source Information Used"),
+        gr.Textbox(label="Model Output", autoscroll=True)
     ],
     title="RAG Pipeline for English Proficiency Test",
-    description="Ask questions about your English proficiency test and get detailed explanations."
+    description=(
+        "Ask questions about your English proficiency test and get detailed explanations.\n\n"
+        "**Disclaimer**: This tool provides explanations based only on the content of the loaded PDF documents and model's raw knowledge. The embedding model might not always fetch the correct passage. AI-generated explanations may sometimes be inaccurate or incomplete. 'Source Information Used' shows the retrieved context the model used to generate the output."
+    )
 )
 load_models_interface = gr.Interface(
     fn=initialize_pipeline,
