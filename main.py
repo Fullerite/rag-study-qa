@@ -31,13 +31,13 @@ def initialize_pipeline(
         embedding_model = SentenceTransformersEmbeddingModel(
             model_name=embedding_model_name
         )
-        state.append("Embedding model has been loaded.")
-        yield " ".join(state)
+        state.append("- Embedding model has been loaded.")
+        yield "\n".join(state)
         generation_model = TransformersGenerationModel(
             model_name=generation_model_name
         )
-        state.append("Generation model has been loaded.")
-        yield " ".join(state)
+        state.append("- Generation model has been loaded.")
+        yield "\n".join(state)
     except ModelLoadingError as e:
         raise gr.Error(
             message=(
@@ -60,8 +60,8 @@ def initialize_pipeline(
 
     try:
         rag_pipeline = RAGPipeline(embedding_model, generation_model)
-        state.append("RAG pipeline initialized.")
-        yield " ".join(state)
+        state.append("- RAG pipeline has been initialized.")
+        yield "\n".join(state)
     except RAGInitializationError as e:
         raise gr.Error(
             message=(
@@ -88,8 +88,9 @@ def initialize_pipeline(
             task_pattern=r"(Question\s+\d+\..*?)(?=Question\s+\d+\.|\Z)",
             answer_pattern=r"^[A-D]\)",
         )
-        state.append("Knowledge corpus created.")
-        yield " ".join(state)
+        state.append("- Knowledge corpus has been created.")
+        state.append("\n\n**RAG pipeline initializtion complete**")
+        yield "\n".join(state)
     except CorpusCreationError as e:
         raise gr.Error(
             message=(
@@ -168,7 +169,7 @@ load_models_interface = gr.Interface(
         gr.Textbox(label="Embedding Model Name"),
         gr.Textbox(label="Generation Model Name")
     ],
-    outputs=gr.Textbox(label="State"),
+    outputs=gr.Markdown(label="State", value="[x] Pipeline not itinialized"),
     title="Load The Models for RAG Pipeline"
 )
 query_interface = gr.Interface(
