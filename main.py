@@ -1,9 +1,12 @@
 import logging
 import gradio as gr
+
 from rag.embedding.embedding_model import SentenceTransformersEmbeddingModel
 from rag.generation.generation_model import TransformersGenerationModel
 from rag.rag_pipeline import RAGPipeline
 from rag_logs.logger import configure_logging
+
+from textwrap import dedent
 from exceptions.custom_exceptions import (
     ModelLoadingError,
     RAGInitializationError,
@@ -126,6 +129,18 @@ def query(
             if not user_query:
                 raise ValueError()
 
+            system_instructions = dedent("""
+            ## Behavior instructions
+            Explain yourself thoroughly, don't omit any crucial details.
+            Be mindful and respectful to your user.
+            Don't use any Markdown or LATEX text formatting symbols.
+            Your answer language should match your user's query language. The only exceptions are the original file contents.
+            """)
+            if system_prompt:
+                system_prompt = system_instructions + "\n\n" + system_prompt
+            else:
+                system_prompt = system_instructions
+            print(system_prompt)
             streamed_output, context = rag_pipeline.query(
                 user_query=user_query,
                 system_prompt=system_prompt,
