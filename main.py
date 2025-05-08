@@ -43,6 +43,12 @@ def initialize_pipeline(
             message=e.message,
             duration=None
         )
+    except Exception as e:
+        logger.exception("An unexpected error occured during model loading")
+        raise gr.Error(
+            message=f"An unexpected error occured during model loading: {e}",
+            duration=None
+        )
 
     try:
         rag_pipeline = RAGPipeline(embedding_model, generation_model)
@@ -51,6 +57,12 @@ def initialize_pipeline(
     except RAGInitializationError as e:
         raise gr.Error(
             message=e.message,
+            duration=None
+        )
+    except Exception as e:
+        logger.exception("An unexpected error occured during RAG pipeline initialization")
+        raise gr.Error(
+            message=f"An unexpected error occured during RAG pipeline initialization: {e}",
             duration=None
         )
 
@@ -65,6 +77,12 @@ def initialize_pipeline(
     except CorpusCreationError as e:
         raise gr.Error(
             message=e.message,
+            duration=None
+        )
+    except Exception as e:
+        logger.exception("An unexpected error occured during knowledge corpus creation")
+        raise gr.Error(
+            message=f"An unexpected error occured during knowledge corpus creation: {e}",
             duration=None
         )
 
@@ -92,12 +110,17 @@ def query(
                 message=e.message,
                 duration=None
             )
+        except Exception as e:
+            logger.exception("An unexpected error occured during user query processing")
+            raise gr.Error(
+                message=f"An unexpected error occured during user query processing: {e}",
+                duration=None
+            )
     else:
         raise gr.Error(
             message="You haven't initialized the RAG pipeline yet. Proceed to the 'Load models' page, please.",
             duration=None
         )
-
 
 
 # TODO: create the knowledge corpus on startup, and not on each query call
