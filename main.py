@@ -128,7 +128,7 @@ def query(
             generated_text = ""
             for text_chunk in streamed_output:
                 generated_text += text_chunk
-                yield generated_text, context
+                yield context, generated_text
         except QueryProcessingError as e:
             raise gr.Error(
                 message=(
@@ -175,7 +175,7 @@ query_interface = gr.Interface(
     fn=query,
     inputs=[
         gr.Textbox(label="System Prompt", lines=10),
-        gr.Textbox(lines=2, placeholder="Enter your question here...", label="User Query"),
+        gr.Textbox(label="User Query", lines=2, placeholder="Enter your question here..."),
     ],
     outputs=[
         gr.Textbox(label="Source Information Used"),
