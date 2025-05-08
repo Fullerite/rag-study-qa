@@ -40,14 +40,22 @@ def initialize_pipeline(
         yield " ".join(state)
     except ModelLoadingError as e:
         raise gr.Error(
-            message=e.message,
-            duration=None
+            message=(
+                f"An error occured during model loading. Could not load '{e.model_name}'. "
+                f"Please double check the model name."
+            ),
+            duration=None,
+            print_exception=False
         )
     except Exception as e:
         logger.exception("An unexpected error occured during model loading")
         raise gr.Error(
-            message=f"An unexpected error occured during model loading",
-            duration=None
+            message=(
+                "An unexpected error occured during model loading. "
+                "Please check the application logs for technical details."
+            ),
+            duration=None,
+            print_exception=False
         )
 
     try:
@@ -56,14 +64,22 @@ def initialize_pipeline(
         yield " ".join(state)
     except RAGInitializationError as e:
         raise gr.Error(
-            message=e.message,
-            duration=None
+            message=(
+                "An error occured during RAG pipeline initializaiton. "
+                "Please check the application logs for technical details."
+            ),
+            duration=None,
+            print_exception=False
         )
     except Exception as e:
         logger.exception("An unexpected error occured during RAG pipeline initialization")
         raise gr.Error(
-            message=f"An unexpected error occured during RAG pipeline initialization",
-            duration=None
+            message=(
+                "An unexpected error occured during RAG pipeline initialization. "
+                "Please check the application logs for technical details."
+            ),
+            duration=None,
+            print_exception=False
         )
 
     try:
@@ -76,14 +92,22 @@ def initialize_pipeline(
         yield " ".join(state)
     except CorpusCreationError as e:
         raise gr.Error(
-            message=e.message,
-            duration=None
+            message=(
+                f"An error occured during knowledge corpus creation using the '{e.data_dir}' directory. "
+                f"Please check the application logs for technical details."
+            ),
+            duration=None,
+            print_exception=False
         )
     except Exception as e:
         logger.exception("An unexpected error occured during knowledge corpus creation")
         raise gr.Error(
-            message=f"An unexpected error occured during knowledge corpus creation",
-            duration=None
+            message=(
+                "An unexpected error occured during knowledge corpus creation. "
+                "Please check the application logs for technical details."
+            ),
+            duration=None,
+            print_exception=False
         )
 
 
@@ -107,19 +131,31 @@ def query(
                 yield generated_text, context
         except QueryProcessingError as e:
             raise gr.Error(
-                message=e.message,
-                duration=None
+                message=(
+                    f"An error occured during query processing: '{e.query}'. "
+                    f"Please check the application logs for technical details."
+                ),
+                duration=None,
+                print_exception=False
             )
         except Exception as e:
             logger.exception("An unexpected error occured during user query processing")
             raise gr.Error(
-                message=f"An unexpected error occured during user query processing",
-                duration=None
+                message=(
+                    "An unexpected error occured during user query processing. "
+                    "Please check the application logs for technical details."
+                ),
+                duration=None,
+                print_exception=False
             )
     else:
         raise gr.Error(
-            message="You haven't initialized the RAG pipeline yet. Proceed to the 'Load models' page, please.",
-            duration=None
+            message=(
+                "You haven't initialized the RAG pipeline yet. "
+                "Proceed to the 'Load models' page, please."
+            ),
+            duration=None,
+            print_exception=False
         )
 
 
@@ -148,7 +184,9 @@ query_interface = gr.Interface(
     title="RAG Pipeline for English Proficiency Test",
     description=(
         "Ask questions about your English proficiency test and get detailed explanations.\n\n"
-        "**Disclaimer**: This tool provides explanations based only on the content of the loaded PDF documents and model's raw knowledge. The embedding model might not always fetch the correct passage. AI-generated explanations may sometimes be inaccurate or incomplete. 'Source Information Used' shows the retrieved context the model used to generate the output."
+        "**Disclaimer**: This tool provides explanations based only on the content of the loaded PDF documents and model's raw knowledge. "
+        "The embedding model might not always fetch the correct passage. AI-generated explanations may sometimes be inaccurate or incomplete. "
+        "'Source Information Used' shows the retrieved context the model used to generate the output."
     )
 )
 app = gr.TabbedInterface(
