@@ -54,9 +54,9 @@ class RAGPipeline:
             logger.info("RAG pipeline initialized successfully")
         except Exception as e:
             logger.exception(
-                f"Failed to initialize RAG pipeline"
-                f"Embedding Model: {repr(self._embedding_model)}"
-                f"Generation Model: {repr(self._generation_model)}\n"
+                f"Failed to initialize RAG pipeline\n"
+                f"Embedding Model: {repr(self._embedding_model)}\n"
+                f"Generation Model: {repr(self._generation_model)}"
             )
             raise RAGInitializationError(
                 f"An error occurred while initializing the RAG pipeline:\n{e}",
