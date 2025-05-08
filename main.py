@@ -120,6 +120,12 @@ def query(
 
     if rag_pipeline is not None:
         try:
+            system_prompt = system_prompt.strip()
+            user_query = user_query.strip()
+
+            if not user_query:
+                raise ValueError()
+
             streamed_output, context = rag_pipeline.query(
                 user_query=user_query,
                 system_prompt=system_prompt,
@@ -136,6 +142,12 @@ def query(
                     f"An error occured during query processing: '{e.query}'. "
                     f"Please check the application logs for technical details."
                 ),
+                duration=None,
+                print_exception=False
+            )
+        except ValueError as e:
+            raise gr.Error(
+                message="Your query is empty.",
                 duration=None,
                 print_exception=False
             )
