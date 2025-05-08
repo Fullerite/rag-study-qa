@@ -39,7 +39,7 @@ class DocumentTaskSplitter:
             re.compile(self._task_pattern)
             re.compile(self._answer_pattern)
         except re.error as e:
-            logger.exception(f"Regex compilation error: {e.pattern}.")
+            logger.exception(f"Regex compilation error: {e.pattern}")
             raise ValueError(f"Invalid regex pattern: {e.pattern}. Error compiling at position {e.pos}")
 
 
@@ -108,7 +108,7 @@ class DocumentTaskSplitter:
             logger.info(f"Found {len(questions)} questions in text")
             return questions
         except Exception as e:
-            logger.error(f"Error splitting text: {text}")
+            logger.exception(f"Error splitting text: {text}")
             raise RuntimeError(f"An error occurred while splitting text:\n{e}")
 
 
@@ -157,5 +157,5 @@ class DocumentTaskSplitter:
             logger.info(f"Created {len(split_documents)} task documents")
             return split_documents
         except Exception as e:
-            logger.error(f"Error splitting documents: {documents}")
+            logger.exception(f"Error splitting documents: {documents}")
             raise RuntimeError(f"An error occurred while splitting documents:\n{e}")

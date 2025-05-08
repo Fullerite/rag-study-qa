@@ -102,7 +102,7 @@ class DocumentProcessor:
             logger.info(f"Processed {len(passages)} passages from {file_path}")
             return passages, metadatas
         except Exception as e:
-            logger.error(f"Error processing file: {file_path}")
+            logger.exception(f"Error processing file: {file_path}")
             raise RuntimeError(f"An error occurred while processing the file '{file_path}':\n{e}")
 
 
