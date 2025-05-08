@@ -46,7 +46,7 @@ def initialize_pipeline(
     except Exception as e:
         logger.exception("An unexpected error occured during model loading")
         raise gr.Error(
-            message=f"An unexpected error occured during model loading: {e}",
+            message=f"An unexpected error occured during model loading",
             duration=None
         )
 
@@ -62,7 +62,7 @@ def initialize_pipeline(
     except Exception as e:
         logger.exception("An unexpected error occured during RAG pipeline initialization")
         raise gr.Error(
-            message=f"An unexpected error occured during RAG pipeline initialization: {e}",
+            message=f"An unexpected error occured during RAG pipeline initialization",
             duration=None
         )
 
@@ -82,7 +82,7 @@ def initialize_pipeline(
     except Exception as e:
         logger.exception("An unexpected error occured during knowledge corpus creation")
         raise gr.Error(
-            message=f"An unexpected error occured during knowledge corpus creation: {e}",
+            message=f"An unexpected error occured during knowledge corpus creation",
             duration=None
         )
 
@@ -113,7 +113,7 @@ def query(
         except Exception as e:
             logger.exception("An unexpected error occured during user query processing")
             raise gr.Error(
-                message=f"An unexpected error occured during user query processing: {e}",
+                message=f"An unexpected error occured during user query processing",
                 duration=None
             )
     else:
