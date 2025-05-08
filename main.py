@@ -146,6 +146,7 @@ def query(
                 system_prompt=system_prompt,
                 stream_output=True
             )
+            yield context, "Generating..."
 
             generated_text = ""
             for text_chunk in streamed_output:
