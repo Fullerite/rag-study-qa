@@ -7,7 +7,7 @@ from rag.embedding.embedding_model import SentenceTransformersEmbeddingModel
 from rag.embedding.embedding_function import SentenceTransformerEmbeddingFunction
 from document_processing.document_processor import DocumentProcessor
 
-from typing import Optional
+from typing import Optional, Union, Tuple, Generator
 from exceptions.custom_exceptions import RAGInitializationError, CorpusCreationError, QueryProcessingError
 
 
@@ -25,8 +25,8 @@ class RAGPipeline:
 
     def __init__(
         self,
-        generation_model: TransformersGenerationModel,
-        embedding_model: SentenceTransformersEmbeddingModel
+        embedding_model: SentenceTransformersEmbeddingModel,
+        generation_model: TransformersGenerationModel
     ):
         """
         Initializes the RAGPipeline with a generation model and an embedding model.
@@ -41,8 +41,8 @@ class RAGPipeline:
 
         try:
             logger.info("Initializing RAG pipeline")
-            self._generation_model = generation_model
             self._embedding_model = embedding_model
+            self._generation_model = generation_model
             self.client = chromadb.Client()
             self.collection = self.client.create_collection(
                 name="test_collection",
@@ -54,9 +54,9 @@ class RAGPipeline:
             logger.info("RAG pipeline initialized successfully")
         except Exception as e:
             logger.exception(
-                f"Failed to initialize RAG pipeline"
-                f"Embedding Model: {repr(self._embedding_model)}"
-                f"Generation Model: {repr(self._generation_model)}\n"
+                f"Failed to initialize RAG pipeline\n"
+                f"Embedding Model: {repr(self._embedding_model)}\n"
+                f"Generation Model: {repr(self._generation_model)}"
             )
             raise RAGInitializationError(
                 f"An error occurred while initializing the RAG pipeline:\n{e}",
@@ -70,7 +70,6 @@ class RAGPipeline:
         data_dir: str,
         task_pattern: str,
         answer_pattern:str,
-        add_start_end_index: bool = False
     ) -> None:
         """
         Creates a knowledge corpus by processing PDF files in the specified directory.
@@ -79,11 +78,10 @@ class RAGPipeline:
             - data_dir (str): The directory containing the PDF files.
             - task_pattern (str): The regex pattern used to identify tasks within the documents.
             - answer_pattern (str): The regex pattern used to identify answers within the documents.
-            - add_start_end_index (bool): Whether to include start and end indices in the metadata. Defaults to False.
         """
 
         try:
-            logger.info(f"Creating knowledge corpus from directory: {data_dir}")
+            logger.info(f"Creating knowledge corpus from directory: {repr(data_dir)}")
 
             # Process each PDF file in the directory
             corpus_passages = []
@@ -94,8 +92,7 @@ class RAGPipeline:
                     passages, metadatas = DocumentProcessor.process_file(
                         file_path=file_path,
                         task_pattern=task_pattern,
-                        answer_pattern=answer_pattern,
-                        add_start_end_index=add_start_end_index
+                        answer_pattern=answer_pattern
                     )
                     corpus_passages.extend(passages)
                     corpus_metadatas.extend(metadatas)
@@ -107,17 +104,15 @@ class RAGPipeline:
                     metadatas=corpus_metadatas,
                     ids=[str(uuid.uuid4()) for _ in range(len(corpus_passages))]
                 )
-
                 logger.info(f"Added {len(corpus_passages)} passages to knowledge corpus")
             else:
-                logger.warning("No valid passages were found. Knowledge corpus is empty.")
+                logger.warning("No valid passages were found. Knowledge corpus is empty")
         except Exception as e:
             logger.exception(
                 f"Failed to create knowledge corpus\n"
-                f"Data Directory: {data_dir}\n"
-                f"Task Pattern: {task_pattern}\n"
-                f"Answer Pattern: {answer_pattern}\n"
-                f"Add Start-End Index: {add_start_end_index}"
+                f"Data Directory: {repr(data_dir)}\n"
+                f"Task Pattern: {repr(task_pattern)}\n"
+                f"Answer Pattern: {repr(answer_pattern)}\n"
                 f"ChromaDB client: {repr(self.client)}"
                 f"ChromaDB collection: {repr(self.collection)}"
             )
@@ -126,7 +121,6 @@ class RAGPipeline:
                 data_dir=data_dir,
                 task_pattern=task_pattern,
                 answer_pattern=answer_pattern,
-                add_start_end_index=add_start_end_index,
                 chromadb_client_info=repr(self.client),
                 chromadb_collection_info=repr(self.collection)
             )
@@ -139,7 +133,7 @@ class RAGPipeline:
         context_window_backward: Optional[int] = None,
         context_window_forward: Optional[int] = None,
         stream_output: bool = False
-    ) -> str:
+    ) -> Tuple[Union[Generator[str, None, None], str], str]:
         """
         Answers a user query by retrieving relevant context from the knowledge corpus and generating a response.
 
@@ -155,11 +149,14 @@ class RAGPipeline:
                                     Defaults to False.
 
         Returns:
-            - str: The generated answer to the user query.
+            - Union[str, Generator[str, None, None]]:
+                - stream_output=False: The complete generated text string.
+                - stream_output=True: An generator that yields chunks of generated text as they are produced.
+            - str: The context fetched from the knowledge corpus and used by the generation model.
         """
 
         try:
-            logger.info(f"Processing query: {user_query}")
+            logger.info(f"Processing query: {repr(user_query)}")
 
             # Extract test and question numbers from the query
             metadata_filter = {}
@@ -213,12 +210,12 @@ class RAGPipeline:
                 stream_output=stream_output
             )
 
-            return query_answer
+            return query_answer, passage_context
         except Exception as e:
             logger.exception(
                 f"Failed to process query\n"
                 f"Query: '{user_query}'\n"
-                f""
+                f"System prompt: '{system_prompt}'\n"
                 f"Embedding Model: {repr(self._embedding_model)}\n"
                 f"Generation Model: {repr(self._generation_model)}\n"
                 f"ChromaDB client: {repr(self.client)}"

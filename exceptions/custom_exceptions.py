@@ -83,7 +83,6 @@ class CorpusCreationError(Exception):
         data_dir: Optional[str] = None,
         task_pattern: Optional[str] = None,
         answer_pattern: Optional[str] = None,
-        add_start_end_index: Optional[bool] = None,
         chromadb_client_info: Optional[str] = None,
         chromadb_collection_info: Optional[str] = None
     ):
@@ -91,7 +90,6 @@ class CorpusCreationError(Exception):
         self.data_dir = data_dir
         self.task_pattern = task_pattern
         self.answer_pattern = answer_pattern
-        self.add_start_end_index = add_start_end_index
         self.chromadb_client_info = chromadb_client_info
         self.chromadb_collection_info = chromadb_collection_info
         super().__init__(self.message)
