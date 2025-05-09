@@ -176,6 +176,14 @@ class RAGPipeline:
                 n_results=1
             )
 
+            # Filter cases with non-valid test or question numbers
+            if not result["documents"][0]:
+                logger.warning(
+                    f"No relevant documents found for query {repr(user_query)} "
+                    f"with filter {metadata_filter}"
+                )
+                return "No relevant information found in the files. Double check your question and test numbers or the data folder.", "No context"
+
             # Retrieve metadata and context for the best-matching passage
             best_fit_metadata = result["metadatas"][0][0]
             file_path = best_fit_metadata["source"]
