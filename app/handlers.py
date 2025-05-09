@@ -132,67 +132,67 @@ def query(
 ):
     global rag_pipeline
 
-    if rag_pipeline is not None:
-        try:
-            system_prompt = system_prompt.strip()
-            user_query = user_query.strip()
+    system_prompt = system_prompt.strip()
+    user_query = user_query.strip()
 
-            if not user_query:
-                raise ValueError()
-
-            system_instructions = dedent("""
-            ## Behavior instructions
-            Explain yourself thoroughly, don't omit any crucial details.
-            Be mindful and respectful to your user.
-            Don't use any Markdown or LATEX text formatting symbols.
-            Your answer language should match your user's query language. The only exceptions are the original file contents.
-            """)
-            if system_prompt:
-                system_prompt = system_instructions + "\n\n" + system_prompt
-            else:
-                system_prompt = system_instructions
-            print(system_prompt)
-            streamed_output, context = rag_pipeline.query(
-                user_query=user_query,
-                system_prompt=system_prompt,
-                stream_output=True
-            )
-            yield context, "Generating..."
-
-            generated_text = ""
-            for text_chunk in streamed_output:
-                generated_text += text_chunk
-                yield context, generated_text
-        except QueryProcessingError as e:
-            raise gr.Error(
-                message=(
-                    f"An error occured during query processing: '{e.query}'. "
-                    f"Please check the application logs for technical details."
-                ),
-                duration=None,
-                print_exception=False
-            )
-        except ValueError as e:
-            raise gr.Error(
-                message="Your query is empty.",
-                duration=None,
-                print_exception=False
-            )
-        except Exception as e:
-            logger.exception("An unexpected error occured during user query processing")
-            raise gr.Error(
-                message=(
-                    "An unexpected error occured during user query processing. "
-                    "Please check the application logs for technical details."
-                ),
-                duration=None,
-                print_exception=False
-            )
-    else:
+    if rag_pipeline is None:
         raise gr.Error(
             message=(
                 "You haven't initialized the RAG pipeline yet. "
                 "Proceed to the 'Load Models' page, please."
+            ),
+            duration=None,
+            print_exception=False
+        )
+
+    try:
+        if not user_query:
+            raise ValueError()
+
+        system_instructions = dedent("""
+        ## Behavior instructions
+        Explain yourself thoroughly, don't omit any crucial details.
+        Be mindful and respectful to your user.
+        Don't use any Markdown or LATEX text formatting symbols.
+        Your answer language should match your user's query language. The only exceptions are the original file contents.
+        """)
+        if system_prompt:
+            system_prompt = system_instructions + "\n\n" + system_prompt
+        else:
+            system_prompt = system_instructions
+        print(system_prompt)
+        streamed_output, context = rag_pipeline.query(
+            user_query=user_query,
+            system_prompt=system_prompt,
+            stream_output=True
+        )
+        yield context, "Generating..."
+
+        generated_text = ""
+        for text_chunk in streamed_output:
+            generated_text += text_chunk
+            yield context, generated_text
+    except QueryProcessingError as e:
+        raise gr.Error(
+            message=(
+                f"An error occured during query processing: '{e.query}'. "
+                f"Please check the application logs for technical details."
+            ),
+            duration=None,
+            print_exception=False
+        )
+    except ValueError as e:
+        raise gr.Error(
+            message="Your query is empty. Please, enter something in the 'User Query' text field.",
+            duration=None,
+            print_exception=False
+        )
+    except Exception as e:
+        logger.exception("An unexpected error occured during user query processing")
+        raise gr.Error(
+            message=(
+                "An unexpected error occured during user query processing. "
+                "Please check the application logs for technical details."
             ),
             duration=None,
             print_exception=False
