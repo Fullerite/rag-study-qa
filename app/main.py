@@ -31,7 +31,8 @@ with gr.Blocks() as app:
                 with gr.Column(scale=1):
                     pipeline_state_md = gr.Markdown(
                         label="State",
-                        value="**[X] Pipeline not initialized**"
+                        value="**[X] Pipeline not initialized**",
+                        min_height=100
                     )
                 with gr.Column(scale=2):
                     load_docs_file = gr.File(
@@ -52,8 +53,8 @@ with gr.Blocks() as app:
         with gr.TabItem(label="Query"):
             with gr.Row():
                 gr.Markdown(
-                    "Ask questions about your English proficiency test and get detailed explanations.\n\n"
-                    "**Disclaimer**: This tool provides explanations based only on the content of the loaded PDF documents and model's raw knowledge. "
+                    "### Ask questions about your English proficiency test and get detailed explanations.\n\n"
+                    "### *Disclaimer:* This tool provides explanations based only on the content of the loaded PDF documents and model's raw knowledge. "
                     "The embedding model might not always fetch the correct passage. AI-generated explanations may sometimes be inaccurate or incomplete. "
                     "'Source Information Used' shows the retrieved context the model used to generate the output."
                 )

@@ -23,7 +23,23 @@ def initialize_pipeline(
     generation_model_name: str
 ):
     global rag_pipeline
+
     state = []
+    embedding_model_name = embedding_model_name.strip()
+    generation_model_name = generation_model_name.strip()
+
+    if not embedding_model_name:
+        raise gr.Error(
+            message="Your embedding model name is empty. Please, enter something in the 'Embedding Model Name' text field.",
+            duration=None,
+            print_exception=False
+        )
+    elif not generation_model_name:
+        raise gr.Error(
+            message="Your generation model name is empty. Please, enter something in the 'Generation Model Name' text field.",
+            duration=None,
+            print_exception=False
+        )
 
     try:
         embedding_model = SentenceTransformersEmbeddingModel(
