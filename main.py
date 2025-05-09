@@ -20,9 +20,6 @@ logger = logging.getLogger(__name__)
 rag_pipeline = None
 
 
-# TODO: add the ability to re-initialize the models without re-creating the knowledge corpus
-# TODO: load default models on the initial startup
-# TODO: make the knowledge corpus persistent ???
 def initialize_pipeline(
     embedding_model_name: str,
     generation_model_name: str
@@ -188,23 +185,38 @@ def query(
         )
 
 
-# TODO: create the knowledge corpus on startup, and not on each query call
-# TODO: add file upload functionality to dynamically extend knowledge corpus ???
+# TODO: add file upload functionality to extend knowledge corpus (a separate tab that adds the file to the data folder and maybe calls create_corpus)
 # TODO: add task and answer patterns configuration for better flexibility ???
 load_models_interface = gr.Interface(
     fn=initialize_pipeline,
     inputs=[
-        gr.Textbox(label="Embedding Model Name"),
-        gr.Textbox(label="Generation Model Name")
+        gr.Textbox(
+            label="Embedding Model Name",
+            placeholder="e.g., nomic-ai/nomic-embed-text-v1.5",
+            value="nomic-ai/nomic-embed-text-v1.5"
+        ),
+        gr.Textbox(
+            label="Generation Model Name",
+            placeholder="e.g., Qwen/Qwen2.5-1.5B-Instruct",
+            value="Qwen/Qwen2.5-1.5B-Instruct"
+        )
     ],
-    outputs=gr.Markdown(label="State", value="[x] Pipeline not itinialized"),
+    outputs=gr.Markdown(label="State", value="**[X] Pipeline not itinialized**"),
     title="Load The Models for RAG Pipeline"
 )
 query_interface = gr.Interface(
     fn=query,
     inputs=[
-        gr.Textbox(label="System Prompt", lines=10),
-        gr.Textbox(label="User Query", lines=2, placeholder="Enter your question here..."),
+        gr.Textbox(
+            label="System Prompt",
+            placeholder="[Optional] Guide the AI's explanation style (e.g., 'Be concise', 'Use simple language', 'Explain like I\'m a novice')",
+            lines=10
+        ),
+        gr.Textbox(
+            label="User Query",
+            placeholder="Enter your question here...",
+            lines=2
+        ),
     ],
     outputs=[
         gr.Textbox(label="Source Information Used"),
