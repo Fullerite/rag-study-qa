@@ -215,7 +215,7 @@ class RAGPipeline:
             logger.exception(
                 f"Failed to process query\n"
                 f"Query: '{user_query}'\n"
-                f"System prompt: '{system_prompt}\n'"
+                f"System prompt: '{system_prompt}'\n"
                 f"Embedding Model: {repr(self._embedding_model)}\n"
                 f"Generation Model: {repr(self._generation_model)}\n"
                 f"ChromaDB client: {repr(self.client)}"
