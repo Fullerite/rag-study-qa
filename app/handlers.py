@@ -6,7 +6,6 @@ from rag.rag_pipeline import RAGPipeline
 
 import os
 import shutil
-from pathlib import Path
 from textwrap import dedent
 
 from exceptions.custom_exceptions import (
@@ -25,8 +24,7 @@ DATA_DIR = "data"
 
 
 def get_corpus_files_md():
-    data_path = Path(DATA_DIR)
-    files = sorted([f.name for f in data_path.glob(pattern="*.pdf")])
+    files = sorted([filename for filename in os.listdir(DATA_DIR) if filename.endswith(".pdf")])
     if files:
         result_md = f"Current PDF files in '{DATA_DIR}' ({len(files)} files):\n- " + "\n- ".join(files)
     else:
@@ -37,13 +35,12 @@ def get_corpus_files_md():
 def upload_file(file_list: List[str]):
     global rag_pipeline
 
-    data_path = Path(DATA_DIR)
     update_status = ""
     if file_list:
         try:
             for tmp_path in file_list:
                 filename = os.path.basename(tmp_path)
-                dst_path = data_path / filename
+                dst_path = os.path.join(DATA_DIR, filename)
                 shutil.copy(tmp_path, dst_path)
                 logger.info(f"Successfully uploaded new file '{filename}' to '{DATA_DIR}'")
         except Exception as e:
