@@ -44,7 +44,7 @@ class RAGPipeline:
             logger.info("Initializing RAG pipeline")
             self._embedding_model = embedding_model
             self._generation_model = generation_model
-            self.client = chromadb.Client()
+            self.client = chromadb.EphemeralClient()
             self.collection = self.client.create_collection(
                 name="test_collection",
                 embedding_function=SentenceTransformerEmbeddingFunction(self._embedding_model),
