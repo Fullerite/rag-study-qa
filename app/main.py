@@ -11,7 +11,6 @@ with gr.Blocks() as app:
     gr.Markdown("# RAG pipeline for study material Q&A")
     with gr.Tabs():
         with gr.TabItem(label="Load Models"):
-            gr.Markdown("### If you have uploaded new files, please reinitialize the RAG pipeline for changes to take effect.")
             with gr.Row():
                 with gr.Column(scale=1):
                     embedding_model_tb = gr.Textbox(

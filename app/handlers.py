@@ -35,7 +35,10 @@ def get_corpus_files_md():
 
 
 def upload_file(file_list: List[str]):
+    global rag_pipeline
+
     data_path = Path(DATA_DIR)
+    update_status = ""
     if file_list:
         try:
             for tmp_path in file_list:
@@ -46,11 +49,43 @@ def upload_file(file_list: List[str]):
         except Exception as e:
             logger.exception("An unexpected error occured during file upload")
             raise gr.Error(
-                message="Unexpected error during file upload",
+                message=(
+                    "Unexpected error during file upload. "
+                    "Please check the application logs for technical details."
+                ),
                 duration=None,
                 print_exception=False
             )
-    return get_corpus_files_md()
+
+        try:
+            if rag_pipeline is not None:
+                rag_pipeline.create_knowledge_corpus(
+                    data_dir="data",
+                    task_pattern=r"(Question\s+\d+\..*?)(?=Question\s+\d+\.|\Z)",
+                    answer_pattern=r"^[A-D]\)",
+                )
+                update_status = "Knowledge corpus has been updated with new files.\n\n"
+        except CorpusCreationError as e:
+            raise gr.Error(
+                message=(
+                    f"An error occured during knowledge corpus update using the '{e.data_dir}' directory. "
+                    f"Please check the application logs for technical details."
+                ),
+                duration=None,
+                print_exception=False
+            )
+        except Exception as e:
+            logger.exception("An unexpected error occured during knowledge corpus update")
+            raise gr.Error(
+                message=(
+                    "An unexpected error occured during knowledge corpus update. "
+                    "Please check the application logs for technical details."
+                ),
+                duration=None,
+                print_exception=False
+            )
+
+    return update_status + get_corpus_files_md()
 
 
 def initialize_pipeline(
