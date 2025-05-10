@@ -11,6 +11,11 @@ with gr.Blocks() as app:
     gr.Markdown("# RAG pipeline for study material Q&A")
     with gr.Tabs():
         with gr.TabItem(label="Load Models"):
+            gr.Markdown(
+                "### Pick generation and embedding models from HuggingFace and initialize the pipeline.\n\n"
+                "### You can extend the RAG pipeline knowledge base via the menu on the right. "
+                "If you have already initialized the pipeline, there is no need to re-initialize it after you upload new files - the knowledge corpus will be extended automatically."
+            )
             with gr.Row():
                 with gr.Column(scale=1):
                     embedding_model_tb = gr.Textbox(
@@ -30,6 +35,10 @@ with gr.Blocks() as app:
                 with gr.Column(scale=1):
                     pipeline_state_md = gr.Markdown(
                         value="**[X] Pipeline not initialized**",
+                        min_height=50
+                    )
+                    docs_md = gr.Markdown(
+                        value=get_corpus_files_md,
                         min_height=100
                     )
                 with gr.Column(scale=2):
@@ -41,10 +50,6 @@ with gr.Blocks() as app:
                     upload_files_button = gr.Button(
                         value="Upload Files",
                         variant="secondary"
-                    )
-                    docs_md = gr.Markdown(
-                        value=get_corpus_files_md,
-                        min_height=100
                     )
             load_models_button.click(
                 fn=initialize_pipeline,
@@ -59,8 +64,10 @@ with gr.Blocks() as app:
         with gr.TabItem(label="Query"):
             with gr.Row():
                 gr.Markdown(
-                    "### Ask questions about your English proficiency test and get detailed explanations.\n\n"
-                    "### *Disclaimer:* This tool provides explanations based only on the content of the loaded PDF documents and model's raw knowledge. "
+                    "### Ask questions about your English proficiency test and get detailed explanations. "
+                    "E.g., 'Why C and not A is the correct answer to question 9 in test 2?'\n\n"
+                    "### Explicitly mentioning the question and test number will significantly increase the relevance of retrieved context.\n\n"
+                    "### *Disclaimer:* This tool provides explanations based only on the content of the loaded PDF documents and generation model's raw knowledge. "
                     "The embedding model might not always fetch the correct passage. AI-generated explanations may sometimes be inaccurate or incomplete. "
                     "'Source Information Used' shows the retrieved context the model used to generate the output."
                 )
@@ -73,7 +80,7 @@ with gr.Blocks() as app:
                     )
                     user_query_tb = gr.Textbox(
                         label="User Query",
-                        placeholder="Enter your question here...",
+                        placeholder="Enter your question here",
                         lines=2
                     )
                     submit_button = gr.Button(
