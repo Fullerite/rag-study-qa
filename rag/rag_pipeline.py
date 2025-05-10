@@ -1,5 +1,5 @@
 import os
-import uuid
+import hashlib
 import chromadb
 
 from rag.generation.generation_model import TransformersGenerationModel
@@ -88,7 +88,9 @@ class RAGPipeline:
         answer_pattern:str,
     ) -> None:
         """
-        Creates a knowledge corpus by processing PDF files in the specified directory.
+        Creates or updates a knowledge corpus by processing PDF files in the specified directory.
+        Uses deterministic passage IDs for passages to eliminate the possibility of duplication when
+        updating an existing knowledge corpus.
 
         Args:
             - data_dir (str): The directory containing the PDF files.
@@ -102,6 +104,7 @@ class RAGPipeline:
             # Process each PDF file in the directory
             corpus_passages = []
             corpus_metadatas = []
+            corpus_ids = []
             for filename in os.listdir(data_dir):
                 if filename.endswith(".pdf"):
                     file_path = os.path.join(data_dir, filename)
@@ -110,17 +113,28 @@ class RAGPipeline:
                         task_pattern=task_pattern,
                         answer_pattern=answer_pattern
                     )
+
+                    # Calculate deterministic IDs for passages
+                    passages_ids = []
+                    for i in range(len(passages)):
+                        passage_content = passages[i]
+                        passage_source = metadatas[i].get("source", file_path)
+                        passage_id_str = f"{passage_source}::{passage_content}"
+                        passage_id = hashlib.sha256(passage_id_str.encode("utf-8")).hexdigest()
+                        passages_ids.append(passage_id)
+
                     corpus_passages.extend(passages)
                     corpus_metadatas.extend(metadatas)
+                    corpus_ids.extend(passages_ids)
 
             # Add the processed passages and metadata to the ChromaDB collection
             if corpus_passages:
-                self.collection.add(
+                self.collection.upsert(
                     documents=corpus_passages,
                     metadatas=corpus_metadatas,
-                    ids=[str(uuid.uuid4()) for _ in range(len(corpus_passages))]
+                    ids=corpus_ids
                 )
-                logger.info(f"Added {len(corpus_passages)} passages to knowledge corpus")
+                logger.info(f"Upserted {len(corpus_passages)} passages to knowledge corpus")
             else:
                 logger.warning("No valid passages were found. Knowledge corpus is empty")
         except Exception as e:
@@ -141,7 +155,7 @@ class RAGPipeline:
                 chromadb_collection_info=repr(self.collection)
             )
 
-    
+
     def query(
         self,
         user_query: str,
