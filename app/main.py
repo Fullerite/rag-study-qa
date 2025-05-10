@@ -1,5 +1,5 @@
 import gradio as gr
-from app.handlers import initialize_pipeline, query
+from app.handlers import get_corpus_files_md, upload_file, initialize_pipeline, query
 
 
 import logging
@@ -14,6 +14,8 @@ with gr.Blocks() as app:
     gr.Markdown("# RAG pipeline for study material Q&A")
     with gr.Tabs():
         with gr.TabItem(label="Load Models"):
+            with gr.Row():
+                gr.Markdown("### If you have uploaded new files, please reinitialize the RAG pipeline for changes to take effect.")
             with gr.Row():
                 with gr.Column(scale=1):
                     with gr.Row():
@@ -30,25 +32,41 @@ with gr.Blocks() as app:
                         )
                 with gr.Column(scale=1):
                     pipeline_state_md = gr.Markdown(
-                        label="State",
                         value="**[X] Pipeline not initialized**",
                         min_height=100
                     )
                 with gr.Column(scale=2):
-                    load_docs_file = gr.File(
-                        file_types=["pdf"]
-                    )
+                    with gr.Row():
+                        load_docs_file = gr.File(
+                            label="Extend knowledge base",
+                            file_types=[".pdf"],
+                            file_count="multiple"
+                        )
             with gr.Row():
-                with gr.Column(scale=1):
-                    load_button = gr.Button(
+                with gr.Column(scale=2):
+                    load_models_button = gr.Button(
                         value="Initialize Pipeline",
                         variant="primary",
                     )
-                gr.Column(scale=1)
-            load_button.click(
+                with gr.Column(scale=1):
+                    docs_md = gr.Markdown(
+                        value=get_corpus_files_md,
+                        min_height=100
+                    )
+                with gr.Column(scale=1):
+                    upload_files_button = gr.Button(
+                        value="Upload files",
+                        variant="secondary"
+                    )
+            load_models_button.click(
                 fn=initialize_pipeline,
                 inputs=[embedding_model_tb, generation_model_tb],
                 outputs=[pipeline_state_md]
+            )
+            upload_files_button.click(
+                fn=upload_file,
+                inputs=[load_docs_file],
+                outputs=[docs_md]
             )
         with gr.TabItem(label="Query"):
             with gr.Row():

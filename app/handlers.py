@@ -4,18 +4,53 @@ from rag.embedding.embedding_model import SentenceTransformersEmbeddingModel
 from rag.generation.generation_model import TransformersGenerationModel
 from rag.rag_pipeline import RAGPipeline
 
+import os
+import shutil
+from pathlib import Path
 from textwrap import dedent
+
 from exceptions.custom_exceptions import (
     ModelLoadingError,
     RAGInitializationError,
     CorpusCreationError,
     QueryProcessingError
 )
+from typing import List
 
 
 import logging
 logger = logging.getLogger(__name__)
 rag_pipeline = None
+DATA_DIR = "data"
+
+
+def get_corpus_files_md():
+    data_path = Path(DATA_DIR)
+    files = sorted([f.name for f in data_path.glob(pattern="*.pdf")])
+    if files:
+        result_md = f"Current PDF files in '{DATA_DIR}' ({len(files)} files):\n- " + "\n- ".join(files)
+    else:
+        result_md = f"No files currently in '{DATA_DIR}' ({len(files)} files)"
+    return result_md
+
+
+def upload_file(file_list: List[str]):
+    data_path = Path(DATA_DIR)
+    if file_list:
+        try:
+            for tmp_path in file_list:
+                filename = os.path.basename(tmp_path)
+                dst_path = data_path / filename
+                shutil.copy(tmp_path, dst_path)
+                logger.info(f"Successfully uploaded new file '{filename}' to '{DATA_DIR}'")
+        except Exception as e:
+            logger.exception("An unexpected error occured during file upload")
+            raise gr.Error(
+                message="Unexpected error during file upload",
+                duration=None,
+                print_exception=False
+            )
+    return get_corpus_files_md()
 
 
 def initialize_pipeline(
@@ -23,6 +58,10 @@ def initialize_pipeline(
     generation_model_name: str
 ):
     global rag_pipeline
+
+    if rag_pipeline is not None:
+        rag_pipeline._cleanup()
+        rag_pipeline = None
 
     state = []
     embedding_model_name = embedding_model_name.strip()
