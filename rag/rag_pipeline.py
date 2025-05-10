@@ -7,6 +7,7 @@ from rag.embedding.embedding_model import SentenceTransformersEmbeddingModel
 from rag.embedding.embedding_function import SentenceTransformerEmbeddingFunction
 from document_processing.document_processor import DocumentProcessor
 
+import gc
 from typing import Optional, Union, Tuple, Generator
 from exceptions.custom_exceptions import RAGInitializationError, CorpusCreationError, QueryProcessingError
 
@@ -63,6 +64,21 @@ class RAGPipeline:
                 embedding_model_info=repr(self._embedding_model),
                 generation_model_info=repr(self._generation_model)
             )
+
+
+    def _cleanup(self):
+        logger.info(f"Cleaning up the memory occupied by {object.__repr__(self._embedding_model)} and {object.__repr__(self._generation_model)}")
+        self._embedding_model._cleanup()
+        self._generation_model._cleanup()
+        logger.info(f"Cleaning up the memory occupied by {object.__repr__(self.collection)}")
+        for collection_name in self.client.list_collections():
+            self.client.delete_collection(name=collection_name)
+        self.client = None
+        self.collection = None
+        self._embedding_model = None
+        self._generation_model = None
+        gc.collect()
+        logger.info(f"ChromaDB client and collection, generation model, and embedding model references released and cleaned up")
 
 
     def create_knowledge_corpus(

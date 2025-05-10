@@ -1,4 +1,5 @@
 import torch
+import gc
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TextIteratorStreamer
 from threading import Thread
 from textwrap import dedent
@@ -80,6 +81,15 @@ class TransformersGenerationModel:
             self._tokenizer.chat_template = chat_template
 
         logger.info("Generation model initialized successfully")
+
+
+    def _cleanup(self):
+        logger.info(f"Cleaning up the memory occupied by {object.__repr__(self._model)}")
+        self._model = None
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        gc.collect()
+        logger.info(f"Generation model reference released and cleaned up ({object.__repr__(self._model)})")
 
 
     def __str__(self):

@@ -1,4 +1,5 @@
 import torch
+import gc
 from sentence_transformers import SentenceTransformer
 from typing import List, Union
 from numpy import ndarray
@@ -50,6 +51,15 @@ class SentenceTransformersEmbeddingModel:
                 f"An error occurred while loading the model {repr(model_name)}:\n{e}",
                 model_name=self.model_name,
             )
+        
+    
+    def _cleanup(self):
+        logger.info(f"Cleaning up the memory occupied by {object.__repr__(self._model)}")
+        self._model = None
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        gc.collect()
+        logger.info(f"Embedding model reference released and cleaned up ({object.__repr__(self._model)})")
 
 
     def __str__(self):
