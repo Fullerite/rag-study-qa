@@ -57,7 +57,7 @@ def upload_file(file_list: List[str]):
         try:
             if rag_pipeline is not None:
                 rag_pipeline.create_knowledge_corpus(
-                    data_dir="data",
+                    data_dir=DATA_DIR,
                     task_pattern=r"(Question\s+\d+\..*?)(?=Question\s+\d+\.|\Z)",
                     answer_pattern=r"^[A-D]\)",
                 )
@@ -169,7 +169,7 @@ def initialize_pipeline(
 
     try:
         rag_pipeline.create_knowledge_corpus(
-            data_dir="data",
+            data_dir=DATA_DIR,
             task_pattern=r"(Question\s+\d+\..*?)(?=Question\s+\d+\.|\Z)",
             answer_pattern=r"^[A-D]\)",
         )
